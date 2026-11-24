@@ -1,0 +1,17 @@
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+venv/
+.venv/
+env/
+
+# Runtime / local leaderboard data (ลบ 2 บรรทัดล่างออก หากต้องการดันคะแนนตั้งต้นไปด้วย)
+backend/leaderboard.json
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid Maze Lab — Front-end + Python Logic</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/maze.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body class="theme-indigo">
+  <!-- หน้าเริ่มเข้าเกม (Start Screen) -->
+  <div id="start-screen" class="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title">
+    <div class="start-card">
+      <span class="badge">140-360 Front-end Design × Python Logic</span>
+      <h1 id="start-title">Grid Maze Lab</h1>
+      <p class="start-desc">
+        สำรวจเขาวงกตบนตารางกริด ค้นหากุญแจ (🔑) เพื่อไขประตูล็อก (🔒) และมุ่งสู่เส้นชัย (★)
+        พร้อมทดลองปรับเส้นกริดไกด์ไลน์และโทนสีแบบเรียลไทม์
+      </p>
+
+      <div class="start-options">
+        <div class="field-group">
+          <label for="start-mode-select">โหมดการเล่นเริ่มต้น</label>
+          <select id="start-mode-select">
+            <option value="level">ด่านมาตรฐาน (เลือกด่าน)</option>
+            <option value="random">สุ่มเขาวงกตใหม่ด้วย Python</option>
+          </select>
+        </div>
+
+        <div id="start-level-group" class="field-group">
+          <label for="start-level-select">เลือกด่าน</label>
+          <select id="start-level-select">
+            <option value="0">ด่าน 1 (7×7)</option>
+            <option value="1">ด่าน 2 (9×9)</option>
+            <option value="2">ด่าน 3 (11×11)</option>
+          </select>
+        </div>
+
+        <div id="start-size-group" class="field-group hidden">
+          <label for="start-size-select">ขนาดเขาวงกตสุ่ม</label>
+          <select id="start-size-select">
+            <option value="7">7×7 (เริ่มต้น)</option>
+            <option value="9" selected>9×9 (ท้าทาย)</option>
+            <option value="11">11×11 (ระดับสูง)</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="start-game-btn" class="btn btn-accent start-cta" type="button">
+        เริ่มเข้าสู่เขาวงกต
+      </button>
+
+      <div class="start-leaderboard">
+        <h2>ทำเนียบคะแนนสูงสุด (Top Leaderboard)</h2>
+        <div class="table-wrap">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ผู้เล่น</th>
+                <th>คะแนน</th>
+                <th>เวลา</th>
+                <th>โหมด</th>
+              </tr>
+            </thead>
+            <tbody id="start-leaderboard-body">
+              <tr>
+                <td colspan="5" class="empty-row">ยังไม่มีสถิติ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าเกมหลัก -->
+  <header class="topbar">
+    <div>
+      <h1>Grid Maze Lab</h1>
+      <p class="subtitle">เขาวงกตตารางกริด • กุญแจ & ประตูล็อก • สุ่มด่าน & Leaderboard</p>
+    </div>
+    <div class="level-controls">
+      <button id="home-btn" class="btn btn-secondary" type="button">หน้าเริ่มเกม</button>
+      <label for="level-select">ด่าน:</label>
+      <select id="level-select">
+        <option value="0">ด่าน 1 (7×7)</option>
+        <option value="1">ด่าน 2 (9×9)</option>
+        <option value="2">ด่าน 3 (11×11)</option>
+      </select>
+      <button id="reset-btn" class="btn btn-secondary" type="button">รีเซ็ตด่าน</button>
+      <button id="random-btn" class="btn btn-accent-inline" type="button">สุ่มเขาวงกตใหม่ (9×9)</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="stage-panel" aria-label="กระดานเขาวงกต">
+      <div class="stats-bar">
+        <div class="stat-box">
+          <span class="stat-label">ก้าวที่เดิน</span>
+          <strong id="steps-count" class="stat-value">0</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">เวลา</span>
+          <strong id="time-display" class="stat-value">00:00</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">คะแนน</span>
+          <strong id="score-display" class="stat-value">1000</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">กุญแจ</span>
+          <strong id="key-status" class="stat-value">ยังไม่มี</strong>
+        </div>
+      </div>
+
+      <div class="maze-wrapper">
+        <div id="maze-board" class="maze-board show-guidelines" role="grid"></div>
+      </div>
+
+      <p id="status-banner" class="status-banner" role="status">
+        กำลังเชื่อมต่อกับ Python Logic...
+      </p>
+
+      <form id="save-score-form" class="save-score-box hidden">
+        <label for="player-name-input">ถึงเส้นชัยแล้ว! บันทึกชื่อลง Leaderboard:</label>
+        <div class="save-score-row">
+          <input
+            type="text"
+            id="player-name-input"
+            maxlength="20"
+            placeholder="กรอกชื่อผู้เล่น..."
+            required
+          />
+          <button type="submit" class="btn btn-accent-inline">บันทึกสถิติ</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="inspector-panel" aria-label="แผงควบคุมและตารางสถิติ">
+      <div class="card">
+        <h2>บังคับทิศทาง (D-Pad / คีย์บอร์ด)</h2>
+        <div class="dpad">
+          <button class="btn btn-dir dir-up" data-dir="UP" type="button" aria-label="เดินขึ้น">▲</button>
+          <button class="btn btn-dir dir-left" data-dir="LEFT" type="button" aria-label="เดินซ้าย">◀</button>
+          <button class="btn btn-dir dir-down" data-dir="DOWN" type="button" aria-label="เดินลง">▼</button>
+          <button class="btn btn-dir dir-right" data-dir="RIGHT" type="button" aria-label="เดินขวา">▶</button>
+        </div>
+        <p class="help-text">ใช้ปุ่มลูกศร ↑ ↓ ← → หรือ WASD บนคีย์บอร์ดก็ได้</p>
+      </div>
+
+      <div class="card">
+        <h2>Front-end Design Tools</h2>
+        <div class="tool-group">
+          <label class="toggle-row">
+            <input type="checkbox" id="toggle-guidelines" checked />
+            <span>แสดงเส้นกริด & พิกัด (Grids & Guidelines)</span>
+          </label>
+          <button id="hint-btn" class="btn btn-accent" type="button">
+            คำนวณเส้นทางสั้นสุด (Python BFS)
+          </button>
+        </div>
+
+        <div class="theme-picker">
+          <span class="tool-label">โทนสี & คอนทราสต์ (Color Harmony):</span>
+          <div class="theme-buttons">
+            <button class="theme-btn active" data-theme="theme-indigo" type="button">Indigo Grid</button>
+            <button class="theme-btn" data-theme="theme-forest" type="button">Forest Moss</button>
+            <button class="theme-btn" data-theme="theme-sunset" type="button">Warm Sunset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card legend-card">
+        <h2>สัญลักษณ์บนกริด</h2>
+        <ul class="legend-list">
+          <li><span class="swatch swatch-player"></span> ผู้เล่น (●)</li>
+          <li><span class="swatch swatch-goal"></span> เส้นชัย (★)</li>
+          <li><span class="swatch swatch-key"></span> กุญแจ (🔑)</li>
+          <li><span class="swatch swatch-door"></span> ประตูล็อก (🔒)</li>
+          <li><span class="swatch swatch-wall"></span> กำแพง</li>
+          <li><span class="swatch swatch-path"></span> ทางเดิน</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>ตารางสถิติคะแนนสูงสุด (Leaderboard)</h2>
+        <div class="table-wrap">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ผู้เล่น</th>
+                <th>คะแนน</th>
+                <th>เวลา</th>
+                <th>โหมด</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr>
+                <td colspan="5" class="empty-row">ยังไม่มีสถิติ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

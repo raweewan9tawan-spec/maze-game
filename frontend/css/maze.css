@@ -1,0 +1,90 @@
+.maze-wrapper {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.maze-board {
+  display: grid;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  gap: 3px;
+  background-color: var(--grid-frame);
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  user-select: none;
+  transition: background-color 0.15s ease, transform 0.12s ease;
+}
+
+.cell-path {
+  background-color: var(--cell-path);
+}
+
+.cell-wall {
+  background-color: var(--cell-wall);
+}
+
+.cell-key {
+  background-color: #fef08a;
+  color: #854d0e;
+  font-weight: 700;
+}
+
+.cell-door {
+  background-color: #d97706;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cell-goal {
+  background-color: var(--cell-goal);
+  color: #111827;
+  font-weight: 700;
+}
+
+.cell-player {
+  background-color: var(--cell-player);
+  color: #ffffff;
+  font-weight: 700;
+  transform: scale(1.04);
+  z-index: 2;
+}
+
+.cell-hint::after {
+  content: "•";
+  font-size: 1.25rem;
+  color: var(--hint-dot);
+}
+
+.maze-board.show-guidelines .cell {
+  outline: 1px dashed var(--guideline-color);
+  outline-offset: -2px;
+}
+
+.coord-tag {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 0.56rem;
+  opacity: 0;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.maze-board.show-guidelines .coord-tag {
+  opacity: 0.75;
+}
